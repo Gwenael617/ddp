@@ -1,0 +1,136 @@
+---
+title       : Immigration in Norway
+subtitle    : A Shiny application and reproducible pitch presentation
+author      : G. Gouerou
+job         : Developing Data Products - Course Project (coursera/jhu)
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+  
+  
+## Immigration in Norway
+
+```{r hook, echo=FALSE}
+hook1 <- function(x){ gsub("```\n*```r*\n*", "", x) }
+hook2 <- function(x){ gsub("```\n+```\n", "", x) }
+knit_hooks$set(document = hook2)
+```
+
+<style>
+/* Styles for Title Slide */
+.title-slide {
+  background-color: #E6E6FA; /*lavender*/
+}
+
+slide.outfont p {
+font-size: 7px ;
+}
+
+slide.outmargin p {
+margin-top: -60px ;
+margin-bottom: -20px ;
+padding-top: -20px ;
+padding-bottom: -20px ;
+}
+strong {
+  font-weight: bold;
+}
+em {
+  font-style: italic
+}
+</style>
+
+We always hear about immigration on the news. It's often deemed to be 
+the reason of all the trouble in a country. However, Immigration is usually
+<strong>a vector of growth and innovation</strong>. By bringing new ways of
+thinking and a willingness to try it out, immigrants are usually beneficial 
+for the society as a whole.  
+
+Still we always hear about the trouble brought by them, not realizing that
+we often live with immigrants without actually noticing it. 
+They may be well integrated or just fewer than what we thought... It may prove
+interesting to study  the numbers at a local level.
+
+This app gives the **_number of immigrants per municipality_** (Commune)
+in Norway and details **_their original background_** 
+(from which area in the world they are coming from). 
+A small graph will then show the trend since 1986.
+
+ 
+
+**Why Norway ?** As my wife is norwegian, I may become an immigrant myself 
+some time in the future. :)
+
+
+---
+
+## How it works  
+
+After selecting the Commune (municipality) and the year, the app will use two
+datasets to render the number of immigrants per World Region for this commune, 
+and an information regarding the share of the total population. 
+A plot showing the trend since 1986 will also be created for this Commune.
+
+
+```{r readData, echo=FALSE}
+im3 <- readRDS("data/im3.RDS")
+pop3 <- readRDS("data/pop3.RDS")
+input <- data.frame(x="temp", y="temp")
+names(input) <- c("municipality", "year")
+```
+
+```{r computeTable, echo=TRUE}
+input$municipality <- "Gran" ; input$year <- 2015
+yearSelected <- as.character(input$year)
+a <- im3[im3$region == input$municipality & im3$time == yearSelected,]
+b <- pop3[pop3$region == input$municipality & pop3$time == yearSelected,]
+# create a percentage column
+for(i in 1:6){
+        a[i,5] <- a[i,4]/b[1,4]*100
+        colnames(a)[5] <- "% of total population"
+        }
+```
+
+
+
+--- .outfont .outmargin
+
+#### The table and the plot :
+
+```{r printTable, echo=FALSE}
+print(a, row.names = FALSE)
+```
+
+```{r plot, echo=FALSE, fig.align='center', fig.height=5.5}
+imPlot <- im3[im3$region == input$municipality,]
+plot(x=imPlot[,2], y=imPlot[,4], xlab = "year", 
+     ylab=c("number of immigrants in ", input$municipality), 
+     col=imPlot$country.background,pch= c(15, 16, 8, 6, 7, 17)[imPlot[,3]])
+legend(x= "topleft",legend = levels(im3$country.background), 
+       col=1:length(im3$country.background), pch=c(15, 16, 8, 6, 7, 17))
+```
+
+
+
+---
+
+*It's important to notice that the main driver of immigration in Norway in the*
+*last five to ten years is coming from within the other European countries.*  
+
+## references :  
+This app uses two dataset :
+* Immigration per county : http://data.ssb.no/api/v0/dataset/48657?lang=en
+* Population per county : http://data.ssb.no/api/v0/dataset/104857?lang=en
+
+### app link :
+
+* http://ggouerou.shinyapps.io/immigrationNorway  
+
+
+
+### this app is not to be used for wrongful or intolerant purpose.  
+
